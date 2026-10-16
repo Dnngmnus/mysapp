@@ -60,6 +60,12 @@ dialog .actions{margin-top:14px}
   <button class="btn ghost" id="btnHarga">Atur Harga</button>
 </header>
 <div class="stripe"></div>
+<div class="ticker">
+  <div class="ticker-track">
+    <span>Selamat datang di sistem pencatatan penjualan BBM &bullet; Pastikan data liter dan plat nomor diisi dengan benar &bullet; Harga dapat diubah lewat tombol Atur Harga &bullet;</span>
+    <span>Selamat datang di sistem pencatatan penjualan BBM &bullet; Pastikan data liter dan plat nomor diisi dengan benar &bullet; Harga dapat diubah lewat tombol Atur Harga &bullet;</span>
+  </div>
+</div>
 
 <main>
   <section class="cards">
