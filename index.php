@@ -55,7 +55,7 @@ dialog .actions{margin-top:14px}
 <header class="top">
   <div class="brand">
     <span class="mark"><i class="r"></i><i class="b"></i><i class="g"></i></span>
-    <div><h1>Pencatatan Penjualan BBM</h1><small>Sistem lokal &middot; server STB</small></div>
+    <div><h1>Pencatatan Penjualan BBM</h1><small>SERVER LOKAL &middot; HG680P</small></div>
   </div>
   <button class="btn ghost" id="btnHarga">Atur Harga</button>
 </header>
