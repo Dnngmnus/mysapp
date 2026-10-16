@@ -99,7 +99,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 <section class="s" id="profil"><div class="wrap">
   <h2>Profil Perusahaan</h2>
   <p class="lead"><?= nl2br(h($p['deskripsi'])) ?></p>
-  <?php if (!empty($p['berdiri'])): ?><span class="fakta">Berdiri sejak <?= h($p['2009']) ?></span><?php endif; ?>
+  <?php if (!empty($p['berdiri'])): ?><span class="fakta">Berdiri sejak <?= h($p['berdiri']) ?></span><?php endif; ?>
 </div></section>
 
 <section class="s alt" id="visi"><div class="wrap">
