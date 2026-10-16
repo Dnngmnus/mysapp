@@ -7,7 +7,7 @@ $me = require_login();
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pencatatan BBM</title>
+<title>PT. GAS ALAM BUMI REOG</title>
 <style>
 :root{--red:#ED1C24;--blue:#0072BC;--green:#6CB33F;--bg:#f3f5f8;--ink:#1d2733;--line:#dde3ea}
 *{box-sizing:border-box}
@@ -71,7 +71,7 @@ a.btn{text-decoration:none;display:inline-block}
 <header class="top">
   <div class="brand">
     <span class="mark"><i class="r"></i><i class="b"></i><i class="g"></i></span>
-    <div><h1>Pencatatan Penjualan BBM</h1><small>SERVER LOKAL &middot; HG680P</small></div>
+    <div><h1>PT. PERTAMINA (Persero) </h1><small>SERVER LOKAL &middot; HG680P</small></div>
   </div>
   <div class="userbar">
     <span class="who"><?= htmlspecialchars($me['nama'], ENT_QUOTES, 'UTF-8') ?>
