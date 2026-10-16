@@ -48,6 +48,12 @@ dialog::backdrop{background:rgba(0,0,0,.45)}
 dialog h2{margin-top:0;color:var(--red)}
 .hrow{display:grid;grid-template-columns:1fr 130px;gap:8px;align-items:center;margin-bottom:8px}
 dialog .actions{margin-top:14px}
+.ticker{background:var(--blue);color:#fff;overflow:hidden;white-space:nowrap;font-size:.9rem;padding:7px 0}
+.ticker-track{display:inline-flex;animation:jalan 30s linear infinite}
+.ticker-track span{padding-right:3rem}
+.ticker:hover .ticker-track{animation-play-state:paused}
+@keyframes jalan{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.ticker-track{animation:none}}
 
 </style>
 </head>
