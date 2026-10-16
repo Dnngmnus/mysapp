@@ -85,7 +85,7 @@ a.btn{text-decoration:none;display:inline-block}
     <span class="who"><?= htmlspecialchars($me['nama'], ENT_QUOTES, 'UTF-8') ?>
       <em class="role <?= $me['role'] === 'admin' ? 'admin' : '' ?>"><?= $me['role'] === 'admin' ? 'Master Admin' : 'User' ?></em></span>
     <?php if ($me['role'] === 'admin'): ?><a class="btn ghost" href="admin.php">Kelola User</a><?php endif; ?>
-    <button class="btn ghost" id="btnHarga" <?= $me['role'] === 'admin' ? '' : 'hidden' ?>>HARGA</button>
+    <button class="btn ghost" id="btnHarga" <?= $me['role'] === 'admin' ? '' : 'hidden' ?>>Atur Harga</button>
     <a class="btn ghost" href="index.php">Beranda</a>
     <a class="btn ghost" href="akun.php">Akun</a>
     <form method="post" action="logout.php">
