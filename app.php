@@ -85,7 +85,7 @@ a.btn{text-decoration:none;display:inline-block}
     <span class="who"><?= htmlspecialchars($me['nama'], ENT_QUOTES, 'UTF-8') ?>
       <em class="role <?= $me['role'] === 'admin' ? 'admin' : '' ?>"><?= $me['role'] === 'admin' ? 'Master Admin' : 'User' ?></em></span>
     <?php if ($me['role'] === 'admin'): ?><a class="btn ghost" href="admin.php">Kelola User</a><?php endif; ?>
-    <button class="btn ghost" id="btnHarga" <?= $me['role'] === 'admin' ? '' : 'hidden' ?>>Atur Harga</button>
+    <button class="btn ghost" id="btnHarga" <?= $me['role'] === 'admin' ? '' : 'hidden' ?>>List Agen</button>
     <a class="btn ghost" href="index.php">Beranda</a>
     <a class="btn ghost" href="akun.php">Akun</a>
     <form method="post" action="logout.php">
@@ -97,14 +97,14 @@ a.btn{text-decoration:none;display:inline-block}
 <div class="stripe"></div>
 <div class="ticker">
   <div class="ticker-track">
-    <span>Selamat datang di sistem pencatatan penjualan BBM &bull; Pastikan data liter dan plat nomor diisi dengan benar &bull; Harga dapat diubah oleh master admin lewat tombol Atur Harga &bull;</span>
-    <span>Selamat datang di sistem pencatatan penjualan BBM &bull; Pastikan data liter dan plat nomor diisi dengan benar &bull; Harga dapat diubah oleh master admin lewat tombol Atur Harga &bull;</span>
+    <span>Selamat datang di sistem pencatatan Penyaluran Elpiji &bull; Pastikan data agen dan plat nomor diisi dengan benar &bull; Halaman ini hanya dapat diakses oleh Admin &bull;</span>
+    <span>Selamat datang di sistem pencatatan Penyaluran Elpiji &bull; Pastikan data agen dan plat nomor diisi dengan benar &bull; Halaman ini hanya dapat diakses oleh Admin &bull;</span>
   </div>
 </div>
 
 <main>
   <nav class="tabs">
-    <button type="button" data-tab="bbm" class="on">Penjualan BBM</button>
+    <button type="button" data-tab="bbm" class="on">laporan Harian</button>
     <button type="button" data-tab="dok">Dokumen Penting</button>
   </nav>
   <div id="tabBbm" class="tabpane">
