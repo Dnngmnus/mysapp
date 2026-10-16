@@ -53,7 +53,6 @@ dialog .actions{margin-top:14px}
 .ticker-track span{padding-right:3rem}
 .ticker:hover .ticker-track{animation-play-state:paused}
 @keyframes jalan{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@media (prefers-reduced-motion:reduce){.ticker-track{animation:none}}
 
 </style>
 </head>
