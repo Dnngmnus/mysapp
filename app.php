@@ -7,7 +7,7 @@ $me = require_login();
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Pencatatan BBM</title>
+<title>PT. GAS ALAM BUMI REOG</title>
 <link rel="icon" type="image/png" href="logo-mark.png">
 <style>
 :root{--red:#ED1C24;--blue:#0072BC;--green:#6CB33F;--bg:#f3f5f8;--ink:#1d2733;--line:#dde3ea}
@@ -79,13 +79,13 @@ a.btn{text-decoration:none;display:inline-block}
 <header class="top">
   <div class="brand">
     <img class="logo" src="logo-mark.png" alt="Pertamina">
-    <div><h1>Pencatatan Penjualan BBM</h1><small>SERVER LOKAL &middot; HG680P</small></div>
+    <div><h1>PT. GAS ALAM BUMI REOG</h1><small>SERVER LOKAL &middot; HG680P</small></div>
   </div>
   <div class="userbar">
     <span class="who"><?= htmlspecialchars($me['nama'], ENT_QUOTES, 'UTF-8') ?>
       <em class="role <?= $me['role'] === 'admin' ? 'admin' : '' ?>"><?= $me['role'] === 'admin' ? 'Master Admin' : 'User' ?></em></span>
     <?php if ($me['role'] === 'admin'): ?><a class="btn ghost" href="admin.php">Kelola User</a><?php endif; ?>
-    <button class="btn ghost" id="btnHarga" <?= $me['role'] === 'admin' ? '' : 'hidden' ?>>Atur Harga</button>
+    <button class="btn ghost" id="btnHarga" <?= $me['role'] === 'admin' ? '' : 'hidden' ?>>HARGA</button>
     <a class="btn ghost" href="index.php">Beranda</a>
     <a class="btn ghost" href="akun.php">Akun</a>
     <form method="post" action="logout.php">
