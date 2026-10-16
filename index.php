@@ -13,7 +13,7 @@ if (isset($_COOKIE['PERTAMINASESS'])) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title><?= h($p['nama']) ?></title>
+<title><?= h($p['PT. GAS ALAM BUMI REOG']) ?></title>
 <link rel="icon" type="image/png" href="logo-mark.png">
 <style>
 :root{--red:#ED1C24;--blue:#0072BC;--green:#6CB33F;--bg:#f3f5f8;--ink:#1d2733;--line:#dde3ea}
@@ -99,7 +99,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
 <section class="s" id="profil"><div class="wrap">
   <h2>Profil Perusahaan</h2>
   <p class="lead"><?= nl2br(h($p['deskripsi'])) ?></p>
-  <?php if (!empty($p['berdiri'])): ?><span class="fakta">Berdiri sejak <?= h($p['berdiri']) ?></span><?php endif; ?>
+  <?php if (!empty($p['berdiri'])): ?><span class="fakta">Berdiri sejak <?= h($p['2009']) ?></span><?php endif; ?>
 </div></section>
 
 <section class="s alt" id="visi"><div class="wrap">
