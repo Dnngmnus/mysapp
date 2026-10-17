@@ -73,6 +73,8 @@ a.btn{text-decoration:none;display:inline-block}
 .tabpane{display:grid;gap:16px}
 .tabpane[hidden]{display:none}
 .hint{color:#6b7886;font-size:.85rem;margin:8px 0 0}
+tfoot td{font-weight:700;background:#f3f5f8;border-top:2px solid var(--line)}
+.filters input[type=month]{flex:0 1 190px}
 </style>
   <link rel="stylesheet" href="app_ext.css">
 </head>
@@ -110,9 +112,9 @@ a.btn{text-decoration:none;display:inline-block}
   </nav>
   <div id="tabBbm" class="tabpane">
   <section class="cards">
-    <div class="card"><span>Transaksi</span><b id="sN">0</b></div>
-    <div class="card"><span>Total Agen</span><b id="sL">0</b></div>
-    <div class="card red"><span>Total Penyaluran</span><b id="sT">0 Kg</b></div>
+    <div class="card"><span id="sTglLbl">Transaksi Hari Ini</span><b id="sN">0</b></div>
+    <div class="card"><span>Total Tabung Hari Ini</span><b id="sB">0</b></div>
+    <div class="card red"><span>Total Penyaluran Hari Ini</span><b id="sT">0 kg</b></div>
   </section>
 
   <section class="panel">
@@ -120,12 +122,14 @@ a.btn{text-decoration:none;display:inline-block}
     <form id="frm" autocomplete="off">
       <input type="hidden" id="id">
       <label>Tanggal<input type="date" id="tanggal" required></label>
-      <label>Agen<input id="pelanggan" maxlength="100" required></label>
-      <label>Plat Nomor<input id="plat" maxlength="15" placeholder="AG 1234 XX"></label>
-      <label>Total Tabung<select id="bbm_id" required></select></label>
-      <label>Penyaluran<input type="number" id="liter" step="360" min="360" required></label>
-      <label>Nama Sopir<input type="number" id="harga" min="0" required></label>
-      <label>Total<input id="total" readonly></label>
+      <label>Agen<select id="agen" required></select></label>
+      <label>Jumlah<select id="jumlah" required>
+        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+      <label>Plat Nomor<input id="plat" maxlength="15" placeholder="AG 1234 XX" style="text-transform:uppercase"></label>
+      <label>Total Tabung<select id="tabung" required>
+        <option>560</option><option>1120</option><option>1680</option><option>2240</option><option>2800</option></select></label>
+      <label>Penyaluran (tabung &times; 3 kg)<input id="kg" readonly></label>
+      <label>Nama Sopir<input id="sopir" maxlength="100" required placeholder="Nama sopir"></label>
       <div class="actions">
         <button class="btn primary" type="submit">Simpan</button>
         <button class="btn ghost" type="button" id="btnBatal">Batal</button>
@@ -135,16 +139,22 @@ a.btn{text-decoration:none;display:inline-block}
 
   <section class="panel">
     <div class="filters">
-      <input id="q" placeholder="Cari pelanggan / plat">
-      <input type="date" id="dari" title="Dari">
-      <input type="date" id="sampai" title="Sampai">
+      <input id="q" placeholder="Cari agen / plat / sopir">
+      <input type="date" id="dari" title="Dari tanggal">
+      <input type="date" id="sampai" title="Sampai tanggal">
       <button class="btn blue" id="btnCari">Filter</button>
+    </div>
+    <div class="filters">
+      <button class="btn ghost" type="button" id="btnXlsTgl" title="Pakai kolom Dari/Sampai di atas. Kosong = hari ini.">Unduh Excel (per tanggal)</button>
+      <input type="month" id="bulan" title="Pilih bulan">
+      <button class="btn ghost" type="button" id="btnXlsBln">Unduh Excel (per bulan)</button>
     </div>
     <div class="scroll">
       <table>
-        <thead><tr><th>Tanggal</th><th>Agen</th><th>Plat</th><th>Jml Tabung</th><th>Sopir</th>
-          <th class="num">Total</th><th></th></tr></thead>
+        <thead><tr><th>Tanggal</th><th>Agen</th><th class="num">Jumlah</th><th>Plat</th>
+          <th class="num">Total Tabung</th><th class="num">Penyaluran (kg)</th><th>Sopir</th><th></th></tr></thead>
         <tbody id="tbody"></tbody>
+        <tfoot id="tfoot"></tfoot>
       </table>
     </div>
   </section>
@@ -177,29 +187,23 @@ a.btn{text-decoration:none;display:inline-block}
   </div>
 </main>
 
-<dialog id="dlgHarga">
-  <h2>Atur Harga BBM</h2>
-  <div id="hargaList"></div>
-  <div class="actions">
-    <button class="btn primary" id="btnSimpanHarga">Simpan</button>
-    <button class="btn ghost" id="btnTutup">Tutup</button>
-  </div>
-</dialog>
 
 <script>
 const $ = id => document.getElementById(id);
-const rp = n => 'Rp ' + Number(n).toLocaleString('id-ID');
-let bbm = [];
+const KG_PER_TABUNG = 3;
+const angka = n => Number(n).toLocaleString('id-ID');
+const tglId = s => s ? s.split('-').reverse().join('/') : '';
 
 const CSRF = <?= json_encode(csrf_token()) ?>;
 
 async function api(action, body, qs = '') {
-  const res = await fetch(`api.php?action=${action}${qs}`, body
+  const res = await fetch(`penyaluran_api.php?action=${action}${qs}`, body
     ? { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': CSRF }, body: JSON.stringify(body) }
     : undefined);
   if (res.status === 401) { location.href = 'login.php'; throw new Error('Sesi berakhir'); }
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error || 'Terjadi kesalahan');
+  let data = {};
+  try { data = await res.json(); } catch (e) {}
+  if (!res.ok) throw new Error(data.error || 'Terjadi kesalahan (' + res.status + ')');
   return data;
 }
 
@@ -210,81 +214,100 @@ function td(text, cls) {
   return c;
 }
 
-async function loadBbm() {
-  bbm = await api('bbm');
-  $('bbm_id').innerHTML = '';
-  bbm.forEach(b => $('bbm_id').add(new Option(b.nama, b.id)));
-  setHargaDefault();
+const hariIni = () => new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+
+// ----- Agen: pilihan dari List Agen -----
+async function loadAgen() {
+  const res = await fetch('agen_api.php?action=list', { credentials: 'same-origin' });
+  if (res.status === 401) { location.href = 'login.php'; return; }
+  const rows = res.ok ? await res.json() : [];
+  const sel = $('agen');
+  sel.innerHTML = '';
+  if (!rows.length) {
+    sel.add(new Option('Belum ada agen (isi di List Agen)', ''));
+    return;
+  }
+  sel.add(new Option('— Pilih agen —', ''));
+  rows.forEach(a => sel.add(new Option(a.nama, a.nama)));
 }
 
-function setHargaDefault() {
-  const b = bbm.find(x => x.id == $('bbm_id').value);
-  if (b) $('harga').value = b.harga;
-  hitung();
-}
-
+// ----- Jumlah <-> Total Tabung (1 jumlah = 560 tabung) -----
 function hitung() {
-  const t = Math.round((+$('liter').value || 0) * (+$('harga').value || 0));
-  $('total').value = rp(t);
+  $('kg').value = angka((+$('tabung').value || 0) * KG_PER_TABUNG) + ' kg';
 }
+$('jumlah').onchange = () => { $('tabung').value = String(560 * (+$('jumlah').value)); hitung(); };
+$('tabung').onchange = () => { $('jumlah').value = String(Math.round(+$('tabung').value / 560)); hitung(); };
 
+// ----- Daftar & ringkasan -----
 async function loadList() {
   const qs = '&q=' + encodeURIComponent($('q').value)
            + '&dari=' + $('dari').value + '&sampai=' + $('sampai').value;
-  const { rows, stat } = await api('list', null, qs);
-  $('sN').textContent = stat.n;
-  $('sL').textContent = Number(stat.liter).toLocaleString('id-ID') + ' L';
-  $('sT').textContent = rp(stat.total);
+  const { rows, filter, today } = await api('list', null, qs);
 
-  const tb = $('tbody');
-  tb.innerHTML = '';
+  $('sTglLbl').textContent = 'Transaksi Hari Ini (' + tglId(today.tanggal) + ')';
+  $('sN').textContent = angka(today.n);
+  $('sB').textContent = angka(today.tabung);
+  $('sT').textContent = angka(today.kg) + ' kg';
+
+  const tb = $('tbody'), tf = $('tfoot');
+  tb.innerHTML = ''; tf.innerHTML = '';
   if (!rows.length) {
-    tb.innerHTML = '<tr><td class="empty" colspan="9">Belum ada data</td></tr>';
+    tb.innerHTML = '<tr><td class="empty" colspan="8">Belum ada data</td></tr>';
     return;
   }
   rows.forEach(r => {
     const tr = document.createElement('tr');
-    tr.append(td(r.tanggal), td(r.pelanggan), td(r.plat || '-'), td(r.bbm), td(r.petugas || '-'),
-      td(Number(r.liter).toLocaleString('id-ID'), 'num'),
-      td(rp(r.harga), 'num'), td(rp(r.total), 'num'));
+    tr.append(td(tglId(r.tanggal)), td(r.agen), td(r.jumlah, 'num'), td(r.plat || '-'),
+      td(angka(r.tabung), 'num'), td(angka(r.kg), 'num'), td(r.sopir || '-'));
     const act = document.createElement('td');
-    const e = document.createElement('button');
-    e.className = 'btn ghost sm'; e.textContent = 'Edit';
-    e.onclick = () => edit(r);
-    const d = document.createElement('button');
-    d.className = 'btn ghost sm'; d.textContent = 'Hapus';
-    d.onclick = () => hapus(r);
-    act.append(e, ' ', d);
+    if (r.can) {
+      const e = document.createElement('button');
+      e.className = 'btn ghost sm'; e.textContent = 'Edit';
+      e.onclick = () => edit(r);
+      const d = document.createElement('button');
+      d.className = 'btn ghost sm'; d.textContent = 'Hapus';
+      d.onclick = () => hapus(r);
+      act.append(e, ' ', d);
+    }
     tr.append(act);
     tb.append(tr);
   });
+  const ft = document.createElement('tr');
+  const lbl = td('Total (sesuai filter): ' + angka(filter.n) + ' transaksi');
+  lbl.colSpan = 4;
+  ft.append(lbl, td(angka(filter.tabung), 'num'), td(angka(filter.kg), 'num'), td(''), td(''));
+  tf.append(ft);
 }
 
 function edit(r) {
   $('formTitle').textContent = 'Edit Transaksi #' + r.id;
   $('id').value = r.id;
   $('tanggal').value = r.tanggal;
-  $('pelanggan').value = r.pelanggan;
+  const sel = $('agen');
+  if (![...sel.options].some(o => o.value === r.agen)) sel.add(new Option(r.agen + ' (tidak ada di List Agen)', r.agen));
+  sel.value = r.agen;
+  $('jumlah').value = String(r.jumlah);
   $('plat').value = r.plat;
-  $('bbm_id').value = r.bbm_id;
-  $('liter').value = r.liter;
-  $('harga').value = r.harga;
+  $('tabung').value = String(r.tabung);
+  $('sopir').value = r.sopir;
   hitung();
   scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function hapus(r) {
-  if (!confirm(`Hapus transaksi ${r.pelanggan} (${r.tanggal})?`)) return;
-  await api('delete', { id: r.id });
-  loadList();
+  if (!confirm(`Hapus transaksi ${r.agen} (${tglId(r.tanggal)})?`)) return;
+  try { await api('delete', { id: r.id }); loadList(); } catch (e) { alert(e.message); }
 }
 
 function resetForm() {
   $('frm').reset();
   $('id').value = '';
   $('formTitle').textContent = 'Tambah Transaksi';
-  $('tanggal').value = new Date().toISOString().slice(0, 10);
-  setHargaDefault();
+  $('tanggal').value = hariIni();
+  $('agen').value = '';
+  $('jumlah').value = '1';
+  $('tabung').value = '560';
+  hitung();
 }
 
 $('frm').addEventListener('submit', async ev => {
@@ -293,51 +316,46 @@ $('frm').addEventListener('submit', async ev => {
     await api('save', {
       id: $('id').value || null,
       tanggal: $('tanggal').value,
-      pelanggan: $('pelanggan').value,
+      agen: $('agen').value,
+      jumlah: $('jumlah').value,
       plat: $('plat').value,
-      bbm_id: $('bbm_id').value,
-      liter: $('liter').value,
-      harga: $('harga').value
+      tabung: $('tabung').value,
+      sopir: $('sopir').value
     });
     resetForm();
     loadList();
   } catch (e) { alert(e.message); }
 });
 
-$('bbm_id').onchange = setHargaDefault;
-$('liter').oninput = hitung;
-$('harga').oninput = hitung;
 $('btnBatal').onclick = resetForm;
-$('btnCari').onclick = loadList;
-$('q').addEventListener('keydown', e => { if (e.key === 'Enter') loadList(); });
+$('btnCari').onclick = () => loadList().catch(e => alert(e.message));
+$('q').addEventListener('keydown', e => { if (e.key === 'Enter') loadList().catch(er => alert(er.message)); });
 
-$('btnHarga').onclick = () => {
-  const box = $('hargaList');
-  box.innerHTML = '';
-  bbm.forEach(b => {
-    const row = document.createElement('div');
-    row.className = 'hrow';
-    const lb = document.createElement('span'); lb.textContent = b.nama;
-    const inp = document.createElement('input');
-    inp.type = 'number'; inp.min = 0; inp.value = b.harga; inp.dataset.id = b.id;
-    row.append(lb, inp);
-    box.append(row);
-  });
-  $('dlgHarga').showModal();
-};
-$('btnTutup').onclick = () => $('dlgHarga').close();
-$('btnSimpanHarga').onclick = async () => {
-  const items = [...$('hargaList').querySelectorAll('input')]
-    .map(i => ({ id: i.dataset.id, harga: i.value }));
-  await api('bbm_update', { items });
-  await loadBbm();
-  $('dlgHarga').close();
+// ----- Rekap Excel -----
+async function unduhXlsx(qs) {
+  try {
+    const res = await fetch('penyaluran_export.php?' + qs, { credentials: 'same-origin' });
+    if (res.status === 401) { location.href = 'login.php'; return; }
+    if (!res.ok) throw new Error((await res.text()) || 'Gagal membuat file Excel');
+    const m = /filename="([^"]+)"/.exec(res.headers.get('Content-Disposition') || '');
+    const url = URL.createObjectURL(await res.blob());
+    const a = document.createElement('a');
+    a.href = url; a.download = m ? m[1] : 'rekap-penyaluran.xlsx';
+    document.body.append(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 2000);
+  } catch (e) { alert(e.message); }
+}
+$('btnXlsTgl').onclick = () => unduhXlsx('mode=tanggal&dari=' + $('dari').value + '&sampai=' + $('sampai').value);
+$('btnXlsBln').onclick = () => {
+  if (!$('bulan').value) { alert('Pilih bulannya dulu.'); $('bulan').focus(); return; }
+  unduhXlsx('mode=bulan&bulan=' + $('bulan').value);
 };
 
 (async () => {
   try {
-    await loadBbm();
+    await loadAgen();
     resetForm();
+    $('bulan').value = hariIni().slice(0, 7);
     await loadList();
   } catch (e) { alert('Gagal memuat: ' + e.message); }
 })();
