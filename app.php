@@ -74,6 +74,7 @@ a.btn{text-decoration:none;display:inline-block}
 .tabpane[hidden]{display:none}
 .hint{color:#6b7886;font-size:.85rem;margin:8px 0 0}
 </style>
+  <link rel="stylesheet" href="app_ext.css">
 </head>
 <body>
 <header class="top">
