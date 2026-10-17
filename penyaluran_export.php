@@ -154,7 +154,7 @@ if ($mode === 'bulan') {
 
 // ---------- 2. Ambil data ----------
 try {
-    $st = db()->prepare('SELECT tanggal, agen, jumlah, plat, tabung, kg, sopir FROM penyaluran
+    $st = db()->prepare('SELECT tanggal, agen, plat, tabung, kg, sopir FROM penyaluran
                          WHERE tanggal BETWEEN ? AND ? ORDER BY tanggal, id LIMIT 20000');
     $st->execute([$dari, $sampai]);
     $data = $st->fetchAll();
@@ -165,7 +165,7 @@ try {
 
 $rincian = []; $perAgen = []; $perTgl = [];
 foreach ($data as $r) {
-    $rincian[] = [0, $r['tanggal'], $r['agen'], (int)$r['jumlah'], $r['plat'], (int)$r['tabung'], (int)$r['kg'], $r['sopir']];
+    $rincian[] = [0, $r['tanggal'], $r['agen'], $r['plat'], (int)$r['tabung'], (int)$r['kg'], $r['sopir']];
     $a = (string)$r['agen'];
     if (!isset($perAgen[$a])) $perAgen[$a] = [0, 0, 0];
     $perAgen[$a][0]++; $perAgen[$a][1] += (int)$r['tabung']; $perAgen[$a][2] += (int)$r['kg'];
@@ -184,8 +184,8 @@ $judul = 'Rekap Penyaluran Elpiji - PT. GAS ALAM BUMI REOG';
 $sub   = 'Periode: ' . $judulPeriode;
 
 $s1 = sheet_xml($judul, $sub,
-    ['No', 'Tanggal', 'Agen', 'Jumlah', 'Plat Nomor', 'Total Tabung', 'Penyaluran (kg)', 'Nama Sopir'],
-    ['no', 'd', 's', 'i', 's', 'i', 'i', 's'], $rincian, [6, 13, 30, 10, 15, 14, 17, 26], [3, 5, 6]);
+    ['No', 'Tanggal', 'Agen', 'Plat Nomor', 'Total Tabung', 'Penyaluran (kg)', 'Nama Sopir'],
+    ['no', 'd', 's', 's', 'i', 'i', 's'], $rincian, [6, 13, 30, 15, 14, 17, 26], [4, 5]);
 $s2 = sheet_xml($judul . ' (Per Agen)', $sub,
     ['No', 'Agen', 'Jumlah Transaksi', 'Total Tabung', 'Penyaluran (kg)'],
     ['no', 's', 'i', 'i', 'i'], $rowsAgen, [6, 34, 18, 14, 17], [2, 3, 4]);

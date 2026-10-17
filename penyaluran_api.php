@@ -54,7 +54,7 @@ try {
         if (tgl_valid($sampai)) { $where[] = 'tanggal <= ?'; $args[] = $sampai; }
         $w = $where ? ' WHERE ' . implode(' AND ', $where) : '';
 
-        $st = $pdo->prepare('SELECT id, user_id, tanggal, agen, jumlah, plat, tabung, kg, sopir FROM penyaluran'
+        $st = $pdo->prepare('SELECT id, user_id, tanggal, agen, plat, tabung, kg, sopir FROM penyaluran'
             . $w . ' ORDER BY tanggal DESC, id DESC LIMIT 1000');
         $st->execute($args);
         $rows = $st->fetchAll();
@@ -79,15 +79,12 @@ try {
         $agen = preg_replace('/\s+/u', ' ', trim((string)($in['agen'] ?? '')));
         if ($agen === null || $agen === '') json_out(['error' => 'Pilih agen dulu.'], 422);
 
-        $jumlah = (int)($in['jumlah'] ?? 0);
-        if ($jumlah < 1 || $jumlah > 5) json_out(['error' => 'Jumlah harus 1 sampai 5.'], 422);
-
         $tabung = (int)($in['tabung'] ?? 0);
         if (!in_array($tabung, PENYALURAN_TABUNG, true)) {
             json_out(['error' => 'Total tabung harus salah satu dari: ' . implode(', ', PENYALURAN_TABUNG) . '.'], 422);
         }
 
-        $plat = mb_strtoupper(preg_replace('/\s+/u', ' ', trim((string)($in['plat'] ?? ''))), 'UTF-8');
+        $plat = strtoupper(preg_replace('/\s+/', ' ', trim((string)($in['plat'] ?? ''))));
         if ($plat !== '' && !preg_match('/^[A-Z0-9 -]{3,15}$/', $plat)) {
             json_out(['error' => 'Plat nomor hanya boleh huruf, angka, spasi (3-15 karakter).'], 422);
         }
@@ -116,11 +113,11 @@ try {
         }
 
         if ($lama) {
-            $pdo->prepare('UPDATE penyaluran SET tanggal=?, agen=?, jumlah=?, plat=?, tabung=?, kg=?, sopir=? WHERE id=?')
-                ->execute([$tanggal, $agen, $jumlah, $plat, $tabung, $kg, $sopir, $id]);
+            $pdo->prepare('UPDATE penyaluran SET tanggal=?, agen=?, plat=?, tabung=?, kg=?, sopir=? WHERE id=?')
+                ->execute([$tanggal, $agen, $plat, $tabung, $kg, $sopir, $id]);
         } else {
-            $pdo->prepare('INSERT INTO penyaluran (user_id, tanggal, agen, jumlah, plat, tabung, kg, sopir) VALUES (?,?,?,?,?,?,?,?)')
-                ->execute([(int)$me['id'], $tanggal, $agen, $jumlah, $plat, $tabung, $kg, $sopir]);
+            $pdo->prepare('INSERT INTO penyaluran (user_id, tanggal, agen, plat, tabung, kg, sopir) VALUES (?,?,?,?,?,?,?)')
+                ->execute([(int)$me['id'], $tanggal, $agen, $plat, $tabung, $kg, $sopir]);
         }
         json_out(['ok' => true]);
 

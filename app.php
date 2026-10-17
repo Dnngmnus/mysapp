@@ -123,8 +123,6 @@ tfoot td{font-weight:700;background:#f3f5f8;border-top:2px solid var(--line)}
       <input type="hidden" id="id">
       <label>Tanggal<input type="date" id="tanggal" required></label>
       <label>Agen<select id="agen" required></select></label>
-      <label>Jumlah<select id="jumlah" required>
-        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
       <label>Plat Nomor<input id="plat" maxlength="15" placeholder="AG 1234 XX" style="text-transform:uppercase"></label>
       <label>Total Tabung<select id="tabung" required>
         <option>560</option><option>1120</option><option>1680</option><option>2240</option><option>2800</option></select></label>
@@ -151,7 +149,7 @@ tfoot td{font-weight:700;background:#f3f5f8;border-top:2px solid var(--line)}
     </div>
     <div class="scroll">
       <table>
-        <thead><tr><th>Tanggal</th><th>Agen</th><th class="num">Jumlah</th><th>Plat</th>
+        <thead><tr><th>Tanggal</th><th>Agen</th><th>Plat</th>
           <th class="num">Total Tabung</th><th class="num">Penyaluran (kg)</th><th>Sopir</th><th></th></tr></thead>
         <tbody id="tbody"></tbody>
         <tfoot id="tfoot"></tfoot>
@@ -231,12 +229,11 @@ async function loadAgen() {
   rows.forEach(a => sel.add(new Option(a.nama, a.nama)));
 }
 
-// ----- Jumlah <-> Total Tabung (1 jumlah = 560 tabung) -----
+// ----- Penyaluran = Total Tabung x 3 kg -----
 function hitung() {
   $('kg').value = angka((+$('tabung').value || 0) * KG_PER_TABUNG) + ' kg';
 }
-$('jumlah').onchange = () => { $('tabung').value = String(560 * (+$('jumlah').value)); hitung(); };
-$('tabung').onchange = () => { $('jumlah').value = String(Math.round(+$('tabung').value / 560)); hitung(); };
+$('tabung').onchange = hitung;
 
 // ----- Daftar & ringkasan -----
 async function loadList() {
@@ -257,7 +254,7 @@ async function loadList() {
   }
   rows.forEach(r => {
     const tr = document.createElement('tr');
-    tr.append(td(tglId(r.tanggal)), td(r.agen), td(r.jumlah, 'num'), td(r.plat || '-'),
+    tr.append(td(tglId(r.tanggal)), td(r.agen), td(r.plat || '-'),
       td(angka(r.tabung), 'num'), td(angka(r.kg), 'num'), td(r.sopir || '-'));
     const act = document.createElement('td');
     if (r.can) {
@@ -274,7 +271,7 @@ async function loadList() {
   });
   const ft = document.createElement('tr');
   const lbl = td('Total (sesuai filter): ' + angka(filter.n) + ' transaksi');
-  lbl.colSpan = 4;
+  lbl.colSpan = 3;
   ft.append(lbl, td(angka(filter.tabung), 'num'), td(angka(filter.kg), 'num'), td(''), td(''));
   tf.append(ft);
 }
@@ -286,7 +283,6 @@ function edit(r) {
   const sel = $('agen');
   if (![...sel.options].some(o => o.value === r.agen)) sel.add(new Option(r.agen + ' (tidak ada di List Agen)', r.agen));
   sel.value = r.agen;
-  $('jumlah').value = String(r.jumlah);
   $('plat').value = r.plat;
   $('tabung').value = String(r.tabung);
   $('sopir').value = r.sopir;
@@ -305,7 +301,6 @@ function resetForm() {
   $('formTitle').textContent = 'Tambah Transaksi';
   $('tanggal').value = hariIni();
   $('agen').value = '';
-  $('jumlah').value = '1';
   $('tabung').value = '560';
   hitung();
 }
@@ -317,7 +312,6 @@ $('frm').addEventListener('submit', async ev => {
       id: $('id').value || null,
       tanggal: $('tanggal').value,
       agen: $('agen').value,
-      jumlah: $('jumlah').value,
       plat: $('plat').value,
       tabung: $('tabung').value,
       sopir: $('sopir').value
