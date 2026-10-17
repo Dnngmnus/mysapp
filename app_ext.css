@@ -31,4 +31,5 @@ img{max-width:100%}
 }
 @media (max-width:420px){
   form{grid-template-columns:1fr}
+  label.lebar{grid-column:auto}
 }

@@ -73,6 +73,9 @@ a.btn{text-decoration:none;display:inline-block}
 .tabpane{display:grid;gap:16px}
 .tabpane[hidden]{display:none}
 .hint{color:#6b7886;font-size:.85rem;margin:8px 0 0}
+label{min-width:0}
+label select,label input{width:100%;min-width:0;text-overflow:ellipsis}
+label.lebar{grid-column:span 2}
 tfoot td{font-weight:700;background:#f3f5f8;border-top:2px solid var(--line)}
 .filters input[type=month]{flex:0 1 190px}
 </style>
@@ -122,7 +125,7 @@ tfoot td{font-weight:700;background:#f3f5f8;border-top:2px solid var(--line)}
     <form id="frm" autocomplete="off">
       <input type="hidden" id="id">
       <label>Tanggal<input type="date" id="tanggal" required></label>
-      <label>Agen<select id="agen" required></select></label>
+      <label class="lebar">Agen<select id="agen" required></select></label>
       <label>Plat Nomor<input id="plat" maxlength="15" placeholder="AG 1234 XX" style="text-transform:uppercase"></label>
       <label>Total Tabung<select id="tabung" required>
         <option>560</option><option>1120</option><option>1680</option><option>2240</option><option>2800</option></select></label>
