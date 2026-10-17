@@ -1,0 +1,34 @@
+/* Perbaikan tampilan HP + gaya tambahan. Dimuat SETELAH CSS bawaan app.php. */
+html,body{max-width:100%;overflow-x:hidden}
+main{min-width:0}
+main>*,.tabpane,.panel,.cards{min-width:0;max-width:100%}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.panel table{min-width:560px}
+img{max-width:100%}
+
+@media (max-width:700px){
+  main{padding:0 10px;margin:14px auto}
+  .top{padding:10px 12px;align-items:flex-start}
+  .brand{gap:10px;min-width:0}
+  .brand .logo{height:36px}
+  .brand h1{font-size:1rem;line-height:1.25;overflow-wrap:anywhere}
+  .brand small{font-size:.72rem}
+  .userbar{width:100%;justify-content:flex-start;gap:6px}
+  .userbar .who{width:100%;margin:0 0 2px}
+  .userbar .btn{padding:7px 10px;font-size:.82rem}
+  .ticker{font-size:.8rem;padding:6px 0}
+  .cards{grid-template-columns:1fr 1fr;gap:8px}
+  .card{padding:10px 12px}
+  .card b{font-size:1.05rem;word-break:break-word}
+  .card:last-child{grid-column:1/-1}
+  .panel{padding:12px}
+  form{grid-template-columns:1fr 1fr;gap:10px}
+  form .actions{grid-column:1/-1}
+  .filters input,.filters .btn{flex:1 1 100%}
+  .tabs button{flex:1;padding:9px 6px;font-size:.9rem}
+  table{font-size:.82rem}
+  th,td{padding:7px 8px}
+}
+@media (max-width:420px){
+  form{grid-template-columns:1fr}
+}

@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pratinjau</title>
+<style>
+body{margin:0;padding:12px;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:#1d2733;font-size:14px;background:#fff}
+#tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;position:sticky;top:0;background:#fff;padding-bottom:6px}
+#tabs button{border:1px solid #dde3ea;background:#f3f5f8;border-radius:6px;padding:5px 12px;font:inherit;cursor:pointer}
+#tabs button.on{background:#0072BC;color:#fff;border-color:#0072BC}
+#out{overflow:auto}
+#out table{border-collapse:collapse;font-size:13px}
+#out td,#out th{border:1px solid #dde3ea;padding:4px 8px;white-space:pre-wrap;vertical-align:top}
+#out img{max-width:100%;height:auto}
+.doc{max-width:820px;line-height:1.6}
+.doc table td,.doc table th{border:1px solid #dde3ea;padding:4px 8px}
+.note{color:#8a6100;background:#fff3cd;border-radius:6px;padding:6px 10px;margin:8px 0;font-size:13px}
+</style>
+</head>
+<body>
+<div id="tabs"></div>
+<div id="out"></div>
+<script>
+// Halaman ini dijalankan di dalam iframe "sandbox" tanpa akses ke cookie/sesi aplikasi.
+var XLSX_URL = 'https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js';
+var MAMMOTH_URL = 'https://cdn.jsdelivr.net/npm/mammoth@1.4.8/mammoth.browser.min.js';
+var MAX_ROWS = 500, MAX_COLS = 40;
+var out = document.getElementById('out');
+var tabs = document.getElementById('tabs');
+
+function fail(text) { parent.postMessage({ type: 'error', message: text }, '*'); }
+
+function loadScript(src) {
+  return new Promise(function (ok, no) {
+    var s = document.createElement('script');
+    s.src = src;
+    s.onload = ok;
+    s.onerror = function () { no(new Error('Gagal memuat pustaka pratinjau. Pastikan perangkat terhubung ke internet.')); };
+    document.head.appendChild(s);
+  });
+}
+
+function showSheets(wb) {
+  var names = wb.SheetNames;
+  if (!names.length) throw new Error('File tidak berisi lembar kerja.');
+  var buttons = [];
+
+  function draw(i) {
+    buttons.forEach(function (b, k) { b.className = k === i ? 'on' : ''; });
+    var ws = wb.Sheets[names[i]];
+    var note = '';
+    if (ws['!ref']) {
+      var r = XLSX.utils.decode_range(ws['!ref']);
+      if (r.e.r - r.s.r + 1 > MAX_ROWS) { r.e.r = r.s.r + MAX_ROWS - 1; note = 'Hanya ' + MAX_ROWS + ' baris pertama yang ditampilkan.'; }
+      if (r.e.c - r.s.c + 1 > MAX_COLS) { r.e.c = r.s.c + MAX_COLS - 1; note += ' Hanya ' + MAX_COLS + ' kolom pertama yang ditampilkan.'; }
+      ws['!ref'] = XLSX.utils.encode_range(r);
+    }
+    var html = XLSX.utils.sheet_to_html(ws, { header: '', footer: '' });
+    out.innerHTML = (note ? '<div class="note">' + note + ' Unduh file untuk melihat semuanya.</div>' : '') + html;
+  }
+
+  names.forEach(function (n, i) {
+    var b = document.createElement('button');
+    b.textContent = n;
+    b.onclick = function () { draw(i); };
+    tabs.appendChild(b);
+    buttons.push(b);
+  });
+  draw(0);
+}
+
+async function showDocx(buf) {
+  var res = await mammoth.convertToHtml({ arrayBuffer: buf });
+  var doc = new DOMParser().parseFromString(res.value, 'text/html');
+  doc.querySelectorAll('script,style,iframe,object,embed,link,form').forEach(function (n) { n.remove(); });
+  doc.querySelectorAll('*').forEach(function (el) {
+    Array.prototype.slice.call(el.attributes).forEach(function (a) {
+      if (/^on/i.test(a.name)) el.removeAttribute(a.name);
+    });
+  });
+  doc.querySelectorAll('a').forEach(function (a) { a.removeAttribute('href'); });
+  out.innerHTML = '<div class="doc">' + doc.body.innerHTML + '</div>';
+}
+
+window.addEventListener('message', async function (e) {
+  if (e.source !== parent || !e.data || e.data.type !== 'file') return;
+  try {
+    var ext = e.data.ext, buf = e.data.buf;
+    if (ext === 'docx') {
+      await loadScript(MAMMOTH_URL);
+      await showDocx(buf);
+    } else if (ext === 'xlsx' || ext === 'xls' || ext === 'csv') {
+      await loadScript(XLSX_URL);
+      showSheets(XLSX.read(buf, { type: 'array', codepage: 65001 }));
+    } else {
+      throw new Error('Pratinjau tidak tersedia untuk jenis file ini.');
+    }
+    parent.postMessage({ type: 'done' }, '*');
+  } catch (err) {
+    fail((err && err.message) || 'Gagal menampilkan dokumen.');
+  }
+});
+
+parent.postMessage({ type: 'ready' }, '*');
+</script>
+</body>
+</html>

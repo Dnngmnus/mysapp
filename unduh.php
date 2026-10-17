@@ -17,13 +17,17 @@ if (!is_file($path)) {
     exit('File tidak ada di server.');
 }
 
+// inline=1 hanya berlaku untuk PDF (ditampilkan di halaman pratinjau); selain itu selalu diunduh
+$inline = !empty($_GET['inline']) && $row['ekstensi'] === 'pdf';
+
 session_write_close();
 while (ob_get_level()) ob_end_clean();
 
 $fallback = preg_replace('/[^A-Za-z0-9._-]+/', '_', $row['nama_asli']);
-header('Content-Type: application/octet-stream');
+header('Content-Type: ' . ($inline ? 'application/pdf' : 'application/octet-stream'));
 header('X-Content-Type-Options: nosniff');
-header('Content-Disposition: attachment; filename="' . $fallback . '"; filename*=UTF-8\'\'' . rawurlencode($row['nama_asli']));
+header('Content-Disposition: ' . ($inline ? 'inline' : 'attachment')
+     . '; filename="' . $fallback . '"; filename*=UTF-8\'\'' . rawurlencode($row['nama_asli']));
 header('Content-Length: ' . filesize($path));
 header('Cache-Control: private, no-store');
 readfile($path);
