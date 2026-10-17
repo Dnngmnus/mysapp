@@ -110,8 +110,8 @@ a.btn{text-decoration:none;display:inline-block}
   <div id="tabBbm" class="tabpane">
   <section class="cards">
     <div class="card"><span>Transaksi</span><b id="sN">0</b></div>
-    <div class="card"><span>Total Liter</span><b id="sL">0</b></div>
-    <div class="card red"><span>Total Penjualan</span><b id="sT">Rp 0</b></div>
+    <div class="card"><span>Total Agen</span><b id="sL">0</b></div>
+    <div class="card red"><span>Total Penyaluran</span><b id="sT">0 Kg</b></div>
   </section>
 
   <section class="panel">
@@ -119,11 +119,11 @@ a.btn{text-decoration:none;display:inline-block}
     <form id="frm" autocomplete="off">
       <input type="hidden" id="id">
       <label>Tanggal<input type="date" id="tanggal" required></label>
-      <label>Pelanggan<input id="pelanggan" maxlength="100" required></label>
+      <label>Agen<input id="pelanggan" maxlength="100" required></label>
       <label>Plat Nomor<input id="plat" maxlength="15" placeholder="AG 1234 XX"></label>
-      <label>Jenis BBM<select id="bbm_id" required></select></label>
-      <label>Liter<input type="number" id="liter" step="0.01" min="0.01" required></label>
-      <label>Harga / Liter<input type="number" id="harga" min="0" required></label>
+      <label>Total Tabung<select id="bbm_id" required></select></label>
+      <label>Penyaluran<input type="number" id="liter" step="360" min="360" required></label>
+      <label>Nama Sopir<input type="number" id="harga" min="0" required></label>
       <label>Total<input id="total" readonly></label>
       <div class="actions">
         <button class="btn primary" type="submit">Simpan</button>
@@ -141,8 +141,8 @@ a.btn{text-decoration:none;display:inline-block}
     </div>
     <div class="scroll">
       <table>
-        <thead><tr><th>Tanggal</th><th>Pelanggan</th><th>Plat</th><th>BBM</th><th>Petugas</th>
-          <th class="num">Liter</th><th class="num">Harga</th><th class="num">Total</th><th></th></tr></thead>
+        <thead><tr><th>Tanggal</th><th>Agen</th><th>Plat</th><th>Jml Tabung</th><th>Sopir</th>
+          <th class="num">Total</th><th></th></tr></thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
