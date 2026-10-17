@@ -428,5 +428,6 @@ document.querySelectorAll('.tabs button').forEach(b => {
   };
 });
 </script>
+  <script src="app_ext.js"></script>
 </body>
 </html>
