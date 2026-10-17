@@ -96,6 +96,7 @@ footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
   <img src="logo.png" alt="Pertamina">
 </div></section>
 
+<?php include __DIR__ . '/galeri_blok.php'; ?>    
 <section class="s" id="profil"><div class="wrap">
   <h2>Profil Perusahaan</h2>
   <p class="lead"><?= nl2br(h($p['deskripsi'])) ?></p>
